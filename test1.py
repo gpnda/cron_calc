@@ -118,7 +118,7 @@ def next_match_minute(filter, now_minute):
 #     На самом деле пока непонятно как удостовериться.
 
 
-now_second = 10
+now_second = 15
 now_minute = 10
 now_hour = 21
 now_day = 27
@@ -141,14 +141,28 @@ bump_hours = False
 
 
 
-while not bump_minutes:
-    tmp_res = next_match_second(second_filter, now_second)
-    now_second = tmp_res.value
-    if tmp_res.bump_order:
-        _tmp_res_ = increment(now_minute , 60)
-        now_minute = _tmp_res_.value
-        bump_minutes = True
-    print(str(now_minute) + " ------ " + str(now_second))
+
+while not bump_hours:
+    bump_minutes = False
+
+    while not bump_minutes:
+        print("second bumped")
+        tmp_res = next_match_second(second_filter, now_second)
+        now_second = tmp_res.value
+        if tmp_res.bump_order:
+            # _tmp_res_ = increment(now_minute , 60)
+            # now_minute = _tmp_res_.value
+            bump_minutess = True
+        print(str(now_minute) + " ------ " + str(now_second))
+    
+    print("minute bumped")
+    tmp_res2 = next_match_minute(minute_filter, now_minute)
+    now_minute = tmp_res2.value
+    if tmp_res2.bump_order:
+        print("hour bumped")
+        _tmp_res_ = increment(now_hour , 24)
+        now_hour = _tmp_res_.value
+        bump_hours = True
 
 
 
