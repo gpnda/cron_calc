@@ -1,2 +1,2 @@
 # cron_calc
-calculate next run by cron sintax
+calculate next run by cron syntax
