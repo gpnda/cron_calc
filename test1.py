@@ -15,6 +15,39 @@ def increment(x , max):
     return result
 
 
+def is_match(filter, current):
+    result = False
+        
+    if filter == "*" or filter == False:
+        result = True
+
+    elif re.match("\/\d+", filter) is not None:
+        # filter = "/3"
+        divider = int(re.search("\/(\d+)", filter).group(1))
+        if current % divider == 0:
+            result = True
+    
+    elif re.match("\d+(?:,\d+)+", filter) is not None:
+        # filter == "5,10,15"
+        str_arr = re.search("\d+(,\d+)+", filter).group(0)
+        arr = str_arr.split(",")
+        for i in range(0, len(arr)):
+            arr[i] = int(arr[i])
+        
+        if current in arr:
+            result = True
+    
+    elif re.match("(\d+)-(\d+)", filter) is not None:
+        # filter == "9-18":
+        fromint = int(re.search("(\d+)-(\d+)", filter).group(1))
+        toint = int(re.search("(\d+)-(\d+)", filter).group(2))
+        if ((current >= fromint) and (current <= toint)):
+            result = True
+    
+    return result
+
+
+
 def next_match(filter, current, maxvalue):
 
     tmp_bump_order = False
@@ -56,9 +89,6 @@ def next_match(filter, current, maxvalue):
         # filter == "9-18":
         fromint = int(re.search("(\d+)-(\d+)", filter).group(1))
         toint = int(re.search("(\d+)-(\d+)", filter).group(2))
-        print("=================")
-        print(fromint)
-        print(toint)
 
         tmp_res = increment(current , maxvalue)
         x = tmp_res.value
@@ -78,11 +108,28 @@ class MYCRON:
 
     def __init__(self):
         self.second = 15
-        self.minute = 10
-        self.hour = 21
+        self.minute = 30
+        self.hour = 17
         self.day = 27
         self.month = 11
         self.year = 2024
+
+    def start_calc(self):
+        # if not is_match(second_filter, self.second):
+        #     self.get_next_second()
+        if not is_match(minute_filter, self.minute):
+            self.get_next_minute()
+        if not is_match(hour_filter, self.hour):
+            self.get_next_hour()
+        if not is_match(day_filter, self.day):
+            self.get_next_day()
+        if not is_match(month_filter, self.month):
+            self.get_next_month()
+        if not is_match(year_filter, self.year):
+            self.get_next_year()
+
+
+
 
     def get_next_second(self):
         tmp_res = next_match(second_filter, self.second, 60)
@@ -103,19 +150,19 @@ class MYCRON:
             self.get_next_day()
 
     def get_next_day(self):
-        tmp_res = next_match(hour_filter, self.hour, 30)
+        tmp_res = next_match(day_filter, self.day, 30)
         self.day = tmp_res.value
         if tmp_res.bump_order:
             self.get_next_month()
     
     def get_next_month(self):
-        tmp_res = next_match(hour_filter, self.hour, 12)
+        tmp_res = next_match(month_filter, self.month, 12)
         self.month = tmp_res.value
         if tmp_res.bump_order:
             self.get_next_year()
     
     def get_next_year(self):
-        tmp_res = next_match(hour_filter, self.hour, 10000)
+        tmp_res = next_match(year_filter, self.year, 10000)
         self.year = tmp_res.value
         
 
@@ -124,8 +171,8 @@ class MYCRON:
 print("Start")
 
 now_second = 15
-now_minute = 10
-now_hour = 21
+now_minute = 30
+now_hour = 17
 now_day = 27
 now_month = 11
 now_year = 2024
@@ -139,6 +186,7 @@ year_filter = "9-18"
 
 
 mc = MYCRON()
+mc.start_calc()
 while True:
     mc.get_next_second()
     print(str(mc.hour) + ":" + str(mc.minute) + ":" + str(mc.second))
@@ -155,15 +203,15 @@ while True:
 # 1. Все упаковать в один класс
 # 2. Продумать как обращаться к этому классу, ну наверное ожидается, что можно орбратиться к статичному методу, без инстанцирования
 # 3. Раз нет инстанса, как обращаться к локальным переменным, нужна ведь оболасть видимости. Можно инстанцировать объект дочернего класса.
-# 4. Объединить бы все методы get_next_**** в один, можно? да почему нет, отличаются только максимальным значением
-# 5. Добавить регулярные выражения, чтобы парсить фильтры
+# + 4. Объединить бы все методы get_next_**** в один, можно? да почему нет, отличаются только максимальным значением
+# + 5. Добавить регулярные выражения, чтобы парсить фильтры
 # 6. Класс RES кудато бы спрятать чтоли, корявенько лежит
 # 7. чтото надо порешать с исключениями, типа 28/29/30/31 день, и с високосными годами. Где это ловить?
 # 8. Удостовериться, что комбинация фильтров верная, валидная и реальная дата существует. Пока непонятно как удостовериться.
 # 9. текущая реализация доверяет тому, что текущий час - валидный, проходит фильтр, иначе он бы перешагнул его. 
 #    По всей видимости надо будет ввести подгонку годов, месяцев, дней, часов, и т.д. под филтры, 
 #    и именно в таком порядке - сначала года и далее вниз.
-
+# 10. Переписать на PHP
 
 
 # Это все лучше сделать одной функцией next_match()
