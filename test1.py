@@ -140,33 +140,41 @@ bump_hours = False
 
 
 
+class mycron:
 
+    def __init__(self):
+        self.second = 15
+        self.minute = 10
+        self.hour = 21
+        self.day = 27
+        self.month = 11
+        self.year = 2024
 
-def get_next_second(now_arr):
-    tmp_res = next_match_second(second_filter, now_arr["now_second"])
-    if tmp_res.bump_order:
-        get_next_minute()
-
-    
-def get_next_minute():
-    pass
-
-def get_next_hour():
-    pass
-
-
-
-
-while not bump_hours:
-    while not bump_minutes:
-        tmp_res = next_match_second(second_filter, now_second)
+    def get_next_second(self):
+        tmp_res = next_match_second(second_filter, self.second)
+        self.second = tmp_res.value
         if tmp_res.bump_order:
-            bump_minutes = True
-        print(str(now_minute) + " ------ " + str(now_second))
-    
-    tmp_res2 = next_match_minute(minute_filter, now_minute)
-    if tmp_res2.bump_order:
-        bump_hours = True
+            self.get_next_minute()
+
+        
+    def get_next_minute(self):
+        tmp_res = next_match_minute(minute_filter, self.minute)
+        self.minute = tmp_res.value
+        if tmp_res.bump_order:
+            self.get_next_hour()
+        
+
+    def get_next_hour(self):
+        tmp_res = next_match_hour(hour_filter, self.hour)
+        self.hour = tmp_res.value
+        
+
+
+
+mc = mycron()
+while True:
+    mc.get_next_second()
+    print(str(mc.minute) + " ------ " + str(mc.second))
 
 
 
