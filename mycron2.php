@@ -51,22 +51,11 @@ class MYCRON {
         $tmp_bump_order = false;
         $tmp_res = new RES();
 
-        if ($filter == "*" || $filter == false) {
+        if ($filter == "*") {
             $tmp_res = $this->increment($current, $maxvalue);
             if ($tmp_res->bump_order) {
                 $tmp_bump_order = true;
-            } // ********************************** ТУТ не хватает реализации фильтра - одно значение
-        } elseif (preg_match("/\d+/", $filter)) {
-            $intvalue = intval(preg_replace("/(\d+)/", "$1", $filter));
-            $tmp_res = $this->increment($current, $maxvalue);
-            $x = $tmp_res->value;
-            while ($tmp_res->value != $intvalue) {
-                $tmp_res = $this->increment($x, $maxvalue);
-                if ($tmp_res->bump_order) {
-                    $tmp_bump_order = true;
-                }
-                $x = $tmp_res->value;
-            }
+            } 
         } elseif (preg_match("/\/\d+/", $filter)) {
             $divider = intval(preg_replace("/\/(\d+)/", "$1", $filter));
             $tmp_res = $this->increment($current, $maxvalue);
@@ -105,7 +94,18 @@ class MYCRON {
                 }
                 $x = $tmp_res->value;
             }
-        }
+        } elseif (preg_match("/\d+/", $filter)) { // ********************************** ТУТ надо проверить реализацию фильтра - одно значение
+            $intvalue = intval(preg_replace("/(\d+)/", "$1", $filter));
+            $tmp_res = $this->increment($current, $maxvalue);
+            $x = $tmp_res->value;
+            while ($tmp_res->value != $intvalue) {
+                $tmp_res = $this->increment($x, $maxvalue);
+                if ($tmp_res->bump_order) {
+                    $tmp_bump_order = true;
+                }
+                $x = $tmp_res->value;
+            }
+        } 
 
         $tmp_res->bump_order = $tmp_bump_order;
         return $tmp_res;
@@ -137,8 +137,7 @@ class MYCRON {
         $tmp_res = $this->next_match($this->filter['sec'], $this->second, 60);
         $this->second = $tmp_res->value;
         if ($tmp_res->bump_order) {
-            $this->get_next_minute();
-            
+            $this->get_next_minute();            
         }
     }
 
@@ -159,8 +158,14 @@ class MYCRON {
     }
 
     public function get_next_day() {
-        $tmp_res = $this->next_match($this->filter['day'], $this->day, 30);
+        $tmp_res = $this->next_match($this->filter['day'], $this->day, 32);
         $this->day = $tmp_res->value;
+        // Нулевых дней в месяце не бывает, в отличае от секунд, минут и часов
+        if ($tmp_res->value == 0) {
+            print ("Попытка сделать день НУЛЕМ");
+            $tmp_res = $this->next_match($this->filter['day'], $this->day, 32);
+            $tmp_res->bump_order = true;
+        }
         if ($tmp_res->bump_order) {
             $this->get_next_month();
         }
@@ -243,9 +248,9 @@ class CronTimer {
 $start_date = "01.01.2024 10:00:00";
 
 $filter = [
-    "sec" => "1-5",		// Любое число секунд
-    "min" => "3,4,5",	// Число минут кратное 10
-    "hour" => "*",	// Час от 9 до 18 включительно
+    "sec" => "55",		// Любое число секунд
+    "min" => "55",	// Число минут кратное 10
+    "hour" => "/10",	// Час от 9 до 18 включительно
     "day" => "*",		// День любой
     "mon" => "*",		// Месяц любой
     "year" => "*"		// Год любой
