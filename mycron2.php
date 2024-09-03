@@ -138,6 +138,7 @@ class MYCRON {
         $this->second = $tmp_res->value;
         if ($tmp_res->bump_order) {
             $this->get_next_minute();
+            
         }
     }
 
