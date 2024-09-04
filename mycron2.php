@@ -6,6 +6,7 @@ class RES {   // ********************************* От этого класса 
 }
 
 class MYCRON {
+    private $filter, $second, $minute, $hour, $day, $month, $year;
 
     private function increment($x, $max) {
         $result = new RES();
@@ -115,7 +116,24 @@ class MYCRON {
     }
 
     public function start_calc() {
+        // Так оно не работает
+        // if ($this->filter['sec'] == "*") {
+        //     $this->second = 0;
+        // }
+        // if ($this->filter['min'] == "*") {
+        //     $this->minute = 0;
+        // }
+        // if ($this->filter['hour'] == "*") {
+        //     $this->hour = 0;
+        // }
+        // if ($this->filter['day'] == "*") {
+        //     $this->day = 0;
+        // }
+        // if ($this->filter['mon'] == "*") {
+        //     $this->month = 0;
+        // }
         
+
         // if (!$this::is_match($this->filter['sec'], $this->second)) {
         //     $this->get_next_second();
         // }
@@ -185,12 +203,13 @@ class MYCRON {
     }
 
 
-
     public function nextTime($filter, $currenttime) {
 
 
         // ************ Здесь эти переменные парсим из строковой перменной $currenttime **********************
-        $y = date_parse($currenttime);
+        $y = date_parse_from_format("d.m.Y H:i:s", $currenttime);
+
+        
 
         $this->second = $y["second"];
         $this->minute = $y["minute"];
@@ -199,13 +218,9 @@ class MYCRON {
         $this->month = $y["month"];
         $this->year = $y["year"];
 
-        print(">>>>>" . $this->second . "<<<<<\n");
-        print(">>>>>" . $this->minute . "<<<<<\n");
-        print(">>>>>" . $this->hour . "<<<<<\n");
-        print(">>>>>" . $this->day . "<<<<<\n");
-        print(">>>>>" . $this->month . "<<<<<\n");
-        print(">>>>>" . $this->year . "<<<<<\n");
+        
 
+        
         // Это чтоб все не-указанные фильтры по умолчанию были '*'
         $this->filter = array_merge(
             [
@@ -223,20 +238,15 @@ class MYCRON {
         $this->start_calc();
 
         // Основной запуск, он каскадом спустится от секунд до года.
-        //$this->get_next_second();
-        $resultstr = $this->hour . ":" . $this->minute . ":" . $this->second . "   " . $this->day . "-" . $this->month . "-" . $this->year . "\n";
-        
-        // Дернем для проверки еще несколько раз, просто чтоб вывести на экран. Потом надо убрать **********************************
-        //echo $resultstr;
-        for ($i=0;$i<20 ; $i++) {
-            $this->get_next_second();
-            echo $this->hour . ":" . $this->minute . ":" . $this->second . "   " . $this->day . "-" . $this->month . "-" . $this->year . "\n";
-        }
+        $this->get_next_second();
 
+        // наведем красоту
+        $d = mktime($this->hour, $this->minute, $this->second, $this->month, $this->day, $this->year);
+        $resultstr = date("d.m.Y H:i:s", $d);
+        
         return $resultstr;
     }
 }
-
 
 
 
@@ -251,20 +261,3 @@ class CronTimer {
 }
 
 
-$start_date = "01.01.2024 10:00:00";
-
-//"02.03.2024 05:06:07"
-
-$filter = [
-    "sec" => "10",		// Любое число секунд
-    "min" => "/5",	// Число минут кратное 10
-    "hour" => "*",	// Час от 9 до 18 включительно
-    "day" => "*",		// День любой
-    "mon" => "*",		// Месяц любой
-    "year" => "*"		// Год любой
-];
-
-// Здесь выводим искомое значение
-$t=CronTimer::nextTime($filter, $start_date);
-
-?>
